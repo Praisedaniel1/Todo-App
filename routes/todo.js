@@ -167,26 +167,29 @@ router.post("/completed_task", async (req, res) => {
 
 //All_completed_task
 router.post("/all_completed_task", async (req, res) => {
-  const { token, owner_id,completed} = req.body;
+  const { token, owner_id, completed } = req.body;
 
   //checking for required fields
-   if(!token || owner_id)
-  try {
+  if (!token || owner_id)
+    try {
+      //verifying token
+      const user = jwt.verify(token, process.env.JWT_SECRET);
 
-    //verifying token
-    const user = jwt.verify(token, process.env.JWT_SECRET);
-    
-    let todo = new Todo();
-    todo.completed = completed;
+      let todo = new Todo();
+      todo.completed = completed;
 
-    let complete = await Todo.findOneAndUpdate({owner_id, completed: completed}).lean();
-        if(completed === true)
-        return complete ;
+      const complete = await Todo.find({ completed: true })
+      .select(['description','task','timestamp','completed'])
+      .lean();
 
-    return res.status(200).send({status:"success", msg:"All Completed task",complete})
-  } catch (e) {
-    console.log(e);
-    return res.status(400).send({ status: "error", msg: "No Completed tasks" });
-  }
+      return res
+        .status(200)
+        .send({ status: "success", msg: "All Completed task", complete });
+    } catch (e) {
+      console.log(e);
+      return res
+        .status(400)
+        .send({ status: "error", msg: "No Completed tasks" });
+    }
 });
 module.exports = router;

@@ -16,9 +16,11 @@ router.post("/signup", async (req, res) => {
   }
 
   //check for email
-  const valid = /@gmail.com/.test(email)
-  if(!valid){
-    return res.status(400).send({status :"error", msg:"Enter a valid email"})
+  const valid = /@gmail.com/.test(email);
+  if (!valid) {
+    return res
+      .status(400)
+      .send({ status: "error", msg: "Enter a valid email" });
   }
   try {
     // get timestamp~
@@ -31,7 +33,6 @@ router.post("/signup", async (req, res) => {
     user.email = email;
     user.password = password;
     user.username = `${email}_${timestamp}`;
-
     // save document on mogodb
     user = await user.save();
 
@@ -83,9 +84,8 @@ router.post("/login", async (req, res) => {
         .send({ status: "error", msg: "Email or Password incorrect" });
     }
 
-    //_ delete user.password;
+    delete user.password;
 
-    // create token
   } catch (e) {
     console.log(e);
     return res
@@ -158,8 +158,43 @@ router.post("/change_password", async (req, res) => {
     console.log(e);
     return res
       .status(400)
-      .send({ staus: "error", msg: "Check your code you have error" });
+      .send({ status: "error", msg: "Check your code you have error" });
   }
 });
 
+router.post("/logout", async (req, res) => {
+  const { token, user_id, isLoggedIn} = req.body;
+
+  //All fields must be filled
+  if (!token || !user_id) {
+    return res
+      .status(400)
+      .send({ status: "error", msg: "Fill in all required details" });
+  }
+  try{
+    //verifying token
+    jwt.verify(token, process.env.JWT_SECRET);
+    
+    //timestamp
+    const timestamp = new Date();
+    
+    //checking if user exists
+    let user = await User.findOne({_id:user_id})
+    if(!user){
+      return res.status(400).send({status:"error", msg:"user not found"})
+    }
+    //update post document
+    user = await User.findOneAndUpdate(
+      {_id: user_id},
+      {
+        last_seen: timestamp,
+        isLoggedIn : false
+      }
+    ).lean();
+     return res.status(200).send({status:"Ok", msg:"Logged out successfully", user})
+  }catch(e){
+    console.log(e)
+    return res.status(400).send({status:"error", msg:"Some error occured"})
+  }
+});
 module.exports = router;
