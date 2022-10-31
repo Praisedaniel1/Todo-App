@@ -26,28 +26,3 @@ app.use("/todo", require("./routes/todo"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server started on PORT ${PORT}`));
-
-/**
- * TODOS
- * 
- * Follow
- * Unfollow
- * Fetch posts based on users a person is following
- * 
- * Like, Unlike
- * Dislike, Undislike*
- * Comment
- * 
- * Search
- * 
- const posts = await Post.find({
-            '$or': [
-            {title: new RegExp(search_string, 'i')},
-            {body: new RegExp(search_string, 'i')}
-        ]}, {timestamp: 1, owner_name: 1, owner_img: 1, title: 1,
-            body: 1, like_count: 1, comment_count: 1, owner_id: 1})
-
-upload.array('post-files', 10)
-let img_urls = [];
-let img_ids = [];
- */
